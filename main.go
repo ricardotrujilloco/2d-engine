@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
+	"strconv"
+	"time"
 )
 
 const (
@@ -45,18 +48,63 @@ func main() {
 		return
 	}
 
+	err = ttf.Init()
+	if err != nil {
+		fmt.Println("TTF init error: ", err)
+		return
+	}
+	font, err := ttf.OpenFont("fonts/cabal.ttf", 48)
+	if err != nil {
+		fmt.Println("TTF open font error: ", err)
+		return
+	}
+	defer font.Close()
+
+	now := float64(0)
+	elapsed := float64(0)
+
 	for {
+		now = float64(time.Now().UnixNano()) / 1000000.0
+
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
 			case *sdl.QuitEvent:
 				return
 			}
 		}
+
 		renderer.SetDrawColor(255, 255, 255, 255)
 		renderer.Clear()
 
 		player.draw(renderer)
+		player.update()
+
+		elapsedMillisString := strconv.FormatFloat(elapsed, 'f', 2, 64)
+		drawFps(elapsedMillisString, font, renderer)
 
 		renderer.Present()
+
+		elapsed = float64(time.Now().UnixNano())/1000000.0 - now
+
+		fmt.Printf("it took %v\n", elapsedMillisString)
 	}
+}
+
+func drawFps(fpsValue string, font *ttf.Font, renderer *sdl.Renderer) bool {
+	surface, err := font.RenderUTF8Blended(fpsValue, sdl.Color{R: 255, G: 151, B: 157})
+	if err != nil {
+		fmt.Println("RenderUTF8Solid error: ", err)
+		return true
+	}
+	textTexture, err := renderer.CreateTextureFromSurface(surface)
+	_, _, w, h, err := textTexture.Query()
+	if err != nil {
+		fmt.Println("RenderUTF8Solid error: ", err)
+		return true
+	}
+	renderer.Copy(
+		textTexture,
+		&sdl.Rect{X: 0, Y: 0, W: w, H: h},
+		&sdl.Rect{X: 20, Y: 20, W: w, H: h})
+	return false
 }
