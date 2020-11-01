@@ -13,10 +13,12 @@ const (
 type Player struct {
 	texture *sdl.Texture
 	x, y    float64
+	maxX    float64
+	maxY    float64
 }
 
-func newPlayer(renderer *sdl.Renderer) (player Player, error error) {
-	img, err := sdl.LoadBMP("sprites/player.bmp")
+func newPlayer(renderer *sdl.Renderer, maxX float64, maxY float64) (player Player, error error) {
+	img, err := sdl.LoadBMP("data/sprites/player.bmp")
 	if err != nil {
 		return Player{}, fmt.Errorf("loading player sprite error: %v", err)
 	}
@@ -27,8 +29,11 @@ func newPlayer(renderer *sdl.Renderer) (player Player, error error) {
 		return Player{}, fmt.Errorf("creating player texture error: %v", err)
 	}
 
-	player.x = screenWidth / 2.0
-	player.y = screenHeight - playerSize/2.0
+	player.x = maxX / 2.0
+	player.y = maxY - playerSize/2.0
+
+	player.maxX = maxX
+	player.maxY = maxY
 
 	return player, nil
 }
@@ -48,12 +53,45 @@ func (player *Player) getPlayerCoordinatesWithSizeOffset() (float64, float64) {
 	return x, y
 }
 
-func (player *Player) update() {
+func (player *Player) update(elapsed float64) {
 	keys := sdl.GetKeyboardState()
 
+	player.moveInX(elapsed, keys)
+	player.moveInY(elapsed, keys)
+}
+
+func (player *Player) moveInX(elapsed float64, keys []uint8) {
 	if keys[sdl.SCANCODE_LEFT] == 1 {
-		player.x = player.x - playerSpeed
+		newX := player.x - playerSpeed*elapsed
+		if newX >= playerSize/2.0 {
+			player.x = newX
+		} else {
+			player.x = playerSize / 2.0
+		}
 	} else if keys[sdl.SCANCODE_RIGHT] == 1 {
-		player.x = player.x + playerSpeed
+		newX := player.x + playerSpeed*elapsed
+		if newX <= player.maxX-playerSize/2.0 {
+			player.x = newX
+		} else {
+			player.x = player.maxX - playerSize/2.0
+		}
+	}
+}
+
+func (player *Player) moveInY(elapsed float64, keys []uint8) {
+	if keys[sdl.SCANCODE_UP] == 1 {
+		newY := player.y - playerSpeed*elapsed
+		if newY >= playerSize/2.0 {
+			player.y = newY
+		} else {
+			player.y = playerSize / 2.0
+		}
+	} else if keys[sdl.SCANCODE_DOWN] == 1 {
+		newY := player.y + playerSpeed*elapsed
+		if newY <= player.maxY-playerSize/2.0 {
+			player.y = newY
+		} else {
+			player.y = player.maxY - playerSize/2.0
+		}
 	}
 }
