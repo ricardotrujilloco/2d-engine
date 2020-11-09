@@ -29,7 +29,7 @@ func newSpriteRenderer(container *element, renderer *sdl.Renderer, filename stri
 	}
 }
 
-func (sr *spriteRenderer) render(renderer *sdl.Renderer) error {
+func (sr *spriteRenderer) onDraw(renderer *sdl.Renderer) error {
 	// Converting coordinates to top left of sprite
 	x := sr.container.position.x - sr.width/2.0
 	y := sr.container.position.y - sr.height/2.0
