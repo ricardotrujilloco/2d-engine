@@ -1,30 +1,72 @@
 package main
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Component interface {
-	onUpdate() error
-	onDraw(renderer *sdl.Renderer)
-	onCollision(other *Element)
+type vector struct {
+	x, y float64
 }
 
-type Element struct {
-	position   Vector
-	rotation   float64
-	active     bool
-	tag        string
-	collisions []Circle
-	components []Component
+type component interface {
+	onUpdate(elapsed float64) error
+	onDraw(renderer *sdl.Renderer) error
 }
 
-type Vector struct {
-	x float64
-	y float64
+type element struct {
+	position    vector
+	rotation    float64
+	active      bool
+	components  []component
+	maxPosition vector
+	render      *spriteRenderer
 }
 
-type Circle struct {
-	center Vector
-	radius float64
+func (elem *element) draw(renderer *sdl.Renderer) error {
+	for _, comp := range elem.components {
+		err := comp.onDraw(renderer)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
+
+func (elem *element) update(elapsed float64) error {
+	for _, comp := range elem.components {
+		err := comp.onUpdate(elapsed)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (elem *element) addComponent(new component) {
+	for _, existing := range elem.components {
+		if reflect.TypeOf(new) == reflect.TypeOf(existing) {
+			panic(fmt.Sprintf(
+				"attempt to add new component with existing type %v",
+				reflect.TypeOf(new)))
+		}
+	}
+	elem.components = append(elem.components, new)
+}
+
+func (elem *element) getComponent(withType component) component {
+	typ := reflect.TypeOf(withType)
+	for _, comp := range elem.components {
+		if reflect.TypeOf(comp) == typ {
+			return comp
+		}
+	}
+
+	panic(fmt.Sprintf("no component with type %v", reflect.TypeOf(withType)))
+}
+
+var elements []*element
