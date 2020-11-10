@@ -43,15 +43,11 @@ func main() {
 
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 3; j++ {
-			x := (float64(i)/5)*screenWidth + (basicEnemySize / 2.0)
-			y := float64(j)*basicEnemySize + (basicEnemySize / 2.0)
 
-			enemy := newBasicEnemy(renderer, vector{x, y})
-			elements = append(elements, enemy)
 		}
 	}
 
-	initBulletPool(renderer)
+	// initBulletPool(renderer)
 
 	font, errorGettingFont := getFont(err)
 	if errorGettingFont {
@@ -81,7 +77,7 @@ func mainLoop(renderer *sdl.Renderer, font *ttf.Font, err error) {
 			renderer.Clear()
 
 			go updateElements(timeElapsedSinceLastLoop)
-			if drawElements(renderer, err) {
+			if drawElements(err) {
 				return
 			}
 
@@ -102,10 +98,14 @@ func mainLoop(renderer *sdl.Renderer, font *ttf.Font, err error) {
 	}
 }
 
-func drawElements(renderer *sdl.Renderer, err error) bool {
+func drawElements(err error) bool {
 	for _, elem := range elements {
 		if elem.active {
-			err = elem.draw(renderer)
+			drawParameters := drawParameters{
+				position: elem.position,
+				rotation: elem.rotation,
+			}
+			err = elem.draw(drawParameters)
 			if err != nil {
 				fmt.Println("drawing element:", elem)
 				return true
@@ -118,7 +118,12 @@ func drawElements(renderer *sdl.Renderer, err error) bool {
 func updateElements(timeElapsedSinceLastLoop float64) {
 	for _, elem := range elements {
 		if elem.active {
-			var err = elem.update(timeElapsedSinceLastLoop)
+			updateParameters := updateParameters{
+				position: elem.position,
+				elapsed:  timeElapsedSinceLastLoop,
+				width:    elem.width,
+			}
+			err := elem.update(updateParameters)
 			if err != nil {
 				fmt.Println("updating element:", elem)
 				return

@@ -10,17 +10,11 @@ const (
 )
 
 func newBullet(renderer *sdl.Renderer) *element {
-	bullet := &element{}
-
-	sr := newSpriteRenderer(bullet, renderer, "data/sprites/player_bullet.bmp")
-	bullet.addComponent(sr)
-
-	mover := newBulletMover(bullet, bulletSpeed)
-	bullet.addComponent(mover)
-
-	bullet.active = false
-
-	return bullet
+	return &element{
+		active:          false,
+		logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
+		uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
+	}
 }
 
 var bulletPool []*element

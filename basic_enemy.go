@@ -7,15 +7,11 @@ import (
 const basicEnemySize = 105
 
 func newBasicEnemy(renderer *sdl.Renderer, position vector) *element {
-	basicEnemy := &element{}
-
-	basicEnemy.position = position
-	basicEnemy.rotation = 180
-
-	sr := newSpriteRenderer(basicEnemy, renderer, "data/sprites/basic_enemy.bmp")
-	basicEnemy.addComponent(sr)
-
-	basicEnemy.active = true
-
-	return basicEnemy
+	return &element{
+		position:        position,
+		rotation:        180,
+		active:          true,
+		logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
+		uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/basic_enemy.bmp")},
+	}
 }

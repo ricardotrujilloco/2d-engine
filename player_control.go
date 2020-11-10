@@ -7,72 +7,57 @@ import (
 )
 
 type keyboardMover struct {
-	container      *element
-	speed          float64
-	spriteRenderer *spriteRenderer
+	position vector
+	speed    float64
 }
 
-func newKeyboardMover(container *element, speed float64) *keyboardMover {
+func newKeyboardMover(speed float64) *keyboardMover {
 	return &keyboardMover{
-		container:      container,
-		speed:          speed,
-		spriteRenderer: container.getComponent(&spriteRenderer{}).(*spriteRenderer),
+		position: vector{
+			x: screenWidth / 2.0,
+			y: screenHeight - playerSize/2.0,
+		},
+		speed: speed,
 	}
 }
 
-func (mover *keyboardMover) onUpdate(elapsed float64) error {
+func (mover *keyboardMover) onUpdate(parameters updateParameters) error {
 	keys := sdl.GetKeyboardState()
 
-	gameObject := mover.container
-
 	if keys[sdl.SCANCODE_LEFT] == 1 {
-		if gameObject.position.x-(mover.spriteRenderer.width/2.0) > 0 {
-			gameObject.position.x -= mover.speed * elapsed
+		if parameters.position.x-(parameters.width/2.0) >= 0 {
+			mover.position.x -= mover.speed * parameters.elapsed
 		}
 	} else if keys[sdl.SCANCODE_RIGHT] == 1 {
-		if gameObject.position.x+(mover.spriteRenderer.width/2.0) < screenWidth {
-			gameObject.position.x += mover.speed * elapsed
+		if parameters.position.x+(parameters.width/2.0) <= screenWidth {
+			mover.position.x += mover.speed * parameters.elapsed
 		}
 	}
-
-	return nil
-}
-
-func (mover *keyboardMover) onDraw(renderer *sdl.Renderer) error {
 	return nil
 }
 
 type keyboardShooter struct {
-	container *element
-	cooldown  time.Duration
-	lastShot  time.Time
+	coolDown time.Duration
+	lastShot time.Time
 }
 
-func newKeyboardShooter(container *element, cooldown time.Duration) *keyboardShooter {
+func newKeyboardShooter(coolDown time.Duration) *keyboardShooter {
 	return &keyboardShooter{
-		container: container,
-		cooldown:  cooldown,
+		coolDown: coolDown,
 	}
 }
 
-func (mover *keyboardShooter) onUpdate(elapsed float64) error {
+func (mover *keyboardShooter) onUpdate(parameters updateParameters) error {
 	keys := sdl.GetKeyboardState()
 
-	pos := mover.container.position
-
 	if keys[sdl.SCANCODE_SPACE] == 1 {
-		if time.Since(mover.lastShot) >= mover.cooldown {
-			mover.shoot(pos.x+25, pos.y-20)
-			mover.shoot(pos.x-25, pos.y-20)
+		if time.Since(mover.lastShot) >= mover.coolDown {
+			mover.shoot(parameters.position.x+25, parameters.position.y-20)
+			mover.shoot(parameters.position.x-25, parameters.position.y-20)
 
 			mover.lastShot = time.Now()
 		}
 	}
-
-	return nil
-}
-
-func (mover *keyboardShooter) onDraw(renderer *sdl.Renderer) error {
 	return nil
 }
 

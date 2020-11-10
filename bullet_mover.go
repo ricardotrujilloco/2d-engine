@@ -2,35 +2,33 @@ package main
 
 import (
 	"math"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type bulletMover struct {
-	container *element
-	speed     float64
+	speed float64
 }
 
-func newBulletMover(container *element, speed float64) *bulletMover {
+type updateParameters struct {
+	position vector
+	rotation float64
+	width    float64
+	elapsed  float64
+}
+
+func newBulletMover(speed float64) *bulletMover {
 	return &bulletMover{
-		container: container,
-		speed:     speed,
+		speed: speed,
 	}
 }
 
-func (mover *bulletMover) onDraw(renderer *sdl.Renderer) error {
-	return nil
-}
+func (mover *bulletMover) onUpdate(parameters updateParameters) error {
 
-func (mover *bulletMover) onUpdate(elapsed float64) error {
-	cont := mover.container
+	parameters.position.x += bulletSpeed * math.Cos(parameters.rotation) * parameters.elapsed
+	parameters.position.y += bulletSpeed * math.Sin(parameters.rotation) * parameters.elapsed
 
-	cont.position.x += bulletSpeed * math.Cos(cont.rotation) * elapsed
-	cont.position.y += bulletSpeed * math.Sin(cont.rotation) * elapsed
-
-	if cont.position.x > screenWidth || cont.position.x < 0 ||
-		cont.position.y > screenHeight || cont.position.y < 0 {
-		cont.active = false
+	if parameters.position.x > screenWidth || parameters.position.x < 0 ||
+		parameters.position.y > screenHeight || parameters.position.y < 0 {
+		return nil
 	}
 
 	return nil
