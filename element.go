@@ -26,7 +26,6 @@ type element struct {
 	width           float64
 	rotation        float64
 	active          bool
-	maxPosition     vector
 	logicComponents []logicComponent
 	uiComponents    []uiComponent
 }
