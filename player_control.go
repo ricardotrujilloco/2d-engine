@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-	"math"
 	"time"
 )
 
@@ -52,20 +51,15 @@ func (mover *keyboardShooter) onUpdate(parameters updateParameters) error {
 
 	if keys[sdl.SCANCODE_SPACE] == 1 {
 		if time.Since(mover.lastShot) >= mover.coolDown {
-			mover.shoot(parameters.position.x+25, parameters.position.y-20)
-			mover.shoot(parameters.position.x-25, parameters.position.y-20)
-
+			mover.shoot(parameters)
 			mover.lastShot = time.Now()
 		}
 	}
 	return nil
 }
 
-func (mover *keyboardShooter) shoot(x, y float64) {
+func (mover *keyboardShooter) shoot(parameters updateParameters) {
 	if bul, ok := bulletFromPool(); ok {
-		bul.active = true
-		bul.position.x = x
-		bul.position.y = y
-		bul.rotation = 270 * (math.Pi / 180)
+		bul.update(parameters)
 	}
 }

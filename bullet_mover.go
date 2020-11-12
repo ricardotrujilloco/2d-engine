@@ -1,11 +1,9 @@
 package main
 
-import (
-	"math"
-)
-
 type bulletMover struct {
-	speed float64
+	position vector
+	speed    float64
+	active   bool
 }
 
 type updateParameters struct {
@@ -23,11 +21,20 @@ func newBulletMover(speed float64) *bulletMover {
 
 func (mover *bulletMover) onUpdate(parameters updateParameters) error {
 
-	parameters.position.x += bulletSpeed * math.Cos(parameters.rotation) * parameters.elapsed
-	parameters.position.y += bulletSpeed * math.Sin(parameters.rotation) * parameters.elapsed
+	if mover.position.x == 0 && mover.position.y == 0 {
+		mover.position.x = parameters.position.x
+		mover.position.y = parameters.position.y
+		mover.active = true
+	}
 
-	if parameters.position.x > screenWidth || parameters.position.x < 0 ||
-		parameters.position.y > screenHeight || parameters.position.y < 0 {
+	// mover.position.x += bulletSpeed * parameters.elapsed
+	mover.position.y -= bulletSpeed * parameters.elapsed
+
+	if mover.position.x > float64(screenWidth) || mover.position.x < float64(0) ||
+		mover.position.y > float64(screenHeight) || mover.position.y < float64(0) {
+		mover.position.x = 0
+		mover.position.y = 0
+		mover.active = false
 		return nil
 	}
 

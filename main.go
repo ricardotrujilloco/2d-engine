@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/veandco/go-sdl2/ttf"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -47,7 +48,7 @@ func main() {
 		}
 	}
 
-	// initBulletPool(renderer)
+	initBulletPool(renderer)
 
 	font, errorGettingFont := getFont(err)
 	if errorGettingFont {
@@ -100,10 +101,10 @@ func mainLoop(renderer *sdl.Renderer, font *ttf.Font, err error) {
 
 func drawElements(err error) bool {
 	for _, elem := range elements {
-		if elem.active {
+		if *elem.isActive() {
 			drawParameters := drawParameters{
-				position: elem.position,
-				rotation: elem.rotation,
+				position: *elem.getPosition(),
+				rotation: *elem.getRotation(),
 			}
 			err = elem.draw(drawParameters)
 			if err != nil {
@@ -116,12 +117,18 @@ func drawElements(err error) bool {
 }
 
 func updateElements(timeElapsedSinceLastLoop float64) {
+	var playerInstance *player
 	for _, elem := range elements {
-		if elem.active {
+		if reflect.TypeOf(elem) == reflect.TypeOf(&player{}) {
+			playerInstance = elem.(*player)
+		}
+	}
+	for _, elem := range elements {
+		if *elem.isActive() && playerInstance != nil {
 			updateParameters := updateParameters{
-				position: elem.position,
+				position: *playerInstance.getPosition(),
 				elapsed:  timeElapsedSinceLastLoop,
-				width:    elem.width,
+				width:    *elem.getWidth(),
 			}
 			err := elem.update(updateParameters)
 			if err != nil {

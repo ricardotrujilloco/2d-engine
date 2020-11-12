@@ -6,18 +6,69 @@ import (
 
 const (
 	bulletSize  = 32
-	bulletSpeed = 0.3
+	bulletSpeed = 0.6
 )
 
-func newBullet(renderer *sdl.Renderer) *element {
-	return &element{
-		active:          false,
-		logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
-		uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
+type bullet struct {
+	element
+}
+
+func (elem *bullet) isActive() *bool {
+	return &elem.active
+}
+
+func (elem *bullet) getPosition() *vector {
+	return &elem.position
+}
+
+func (elem *bullet) getRotation() *float64 {
+	return &elem.rotation
+}
+
+func (elem *bullet) getWidth() *float64 {
+	return &elem.width
+}
+
+func (elem *bullet) update(updateParameters updateParameters) error {
+	for _, comp := range elem.logicComponents {
+		err := comp.onUpdate(updateParameters)
+		if err != nil {
+			return err
+		}
+	}
+	for _, comp := range elem.logicComponents {
+		switch comp.(type) {
+		case *bulletMover:
+			elem.position.x = comp.(*bulletMover).position.x
+			elem.position.y = comp.(*bulletMover).position.y
+			elem.active = comp.(*bulletMover).active
+		}
+	}
+	return nil
+}
+
+func (elem *bullet) draw(parameters drawParameters) error {
+	for _, comp := range elem.uiComponents {
+		err := comp.onDraw(parameters)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func newBullet(renderer *sdl.Renderer) *bullet {
+	return &bullet{
+		element{
+			active:          false,
+			logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
+			uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
+		},
 	}
 }
 
-var bulletPool []*element
+var bulletPool []gameObject
 
 func initBulletPool(renderer *sdl.Renderer) {
 	for i := 0; i < 30; i++ {
@@ -27,12 +78,11 @@ func initBulletPool(renderer *sdl.Renderer) {
 	}
 }
 
-func bulletFromPool() (*element, bool) {
+func bulletFromPool() (gameObject, bool) {
 	for _, bul := range bulletPool {
-		if !bul.active {
+		if !*bul.isActive() {
 			return bul, true
 		}
 	}
-
 	return nil, false
 }
