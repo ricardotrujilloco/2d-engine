@@ -58,6 +58,5 @@ func textureFromBMP(renderer *sdl.Renderer, filename string) *sdl.Texture {
 	if err != nil {
 		panic(fmt.Errorf("creating texture from %v: %v", filename, err))
 	}
-
 	return tex
 }

@@ -13,7 +13,7 @@ import (
 const (
 	screenWidth  = 600
 	screenHeight = 800
-	desiredFps   = 60.0
+	desiredFps   = 144.0
 )
 
 func main() {
@@ -44,7 +44,11 @@ func main() {
 
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 3; j++ {
+			x := (float64(i)/5)*screenWidth + (basicEnemySize / 2.0)
+			y := float64(j)*basicEnemySize + (basicEnemySize / 2.0)
 
+			enemy := newBasicEnemy(renderer, vector{x, y})
+			elements = append(elements, enemy)
 		}
 	}
 
@@ -78,6 +82,7 @@ func mainLoop(renderer *sdl.Renderer, font *ttf.Font, err error) {
 			renderer.Clear()
 
 			go updateElements(timeElapsedSinceLastLoop)
+			go checkCollisions()
 			if drawElements(err) {
 				return
 			}
@@ -97,23 +102,6 @@ func mainLoop(renderer *sdl.Renderer, font *ttf.Font, err error) {
 		timeElapsedSinceLastLoop = float64(time.Now().UnixNano())/1000000.0 - now
 		timeElapsedSinceLastFpsDraw = timeElapsedSinceLastFpsDraw + timeElapsedSinceLastLoop
 	}
-}
-
-func drawElements(err error) bool {
-	for _, elem := range elements {
-		if *elem.isActive() {
-			drawParameters := drawParameters{
-				position: *elem.getPosition(),
-				rotation: *elem.getRotation(),
-			}
-			err = elem.draw(drawParameters)
-			if err != nil {
-				fmt.Println("drawing element:", elem)
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func updateElements(timeElapsedSinceLastLoop float64) {
@@ -137,6 +125,23 @@ func updateElements(timeElapsedSinceLastLoop float64) {
 			}
 		}
 	}
+}
+
+func drawElements(err error) bool {
+	for _, elem := range elements {
+		if *elem.isActive() {
+			drawParameters := drawParameters{
+				position: *elem.getPosition(),
+				rotation: *elem.getRotation(),
+			}
+			err = elem.draw(drawParameters)
+			if err != nil {
+				fmt.Println("drawing element:", elem)
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func checkForQuitEvent() bool {

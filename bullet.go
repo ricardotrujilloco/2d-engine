@@ -39,9 +39,28 @@ func (elem *bullet) update(updateParameters updateParameters) error {
 	for _, comp := range elem.logicComponents {
 		switch comp.(type) {
 		case *bulletMover:
-			elem.position.x = comp.(*bulletMover).position.x
-			elem.position.y = comp.(*bulletMover).position.y
+			position := comp.(*bulletMover).position
+			elem.position.x = position.x
+			elem.position.y = position.y
+			elem.boundingCircle.center = position
 			elem.active = comp.(*bulletMover).active
+		}
+	}
+	return nil
+}
+
+func (elem *bullet) onCollision(otherElement gameObject) error {
+	canCollide := false
+	switch otherElement.(type) {
+	case *enemy:
+		canCollide = true
+	}
+	for _, comp := range elem.attributes {
+		switch comp.(type) {
+		case *vulnerableToBullets:
+			if canCollide {
+				elem.reset()
+			}
 		}
 	}
 	return nil
@@ -54,8 +73,22 @@ func (elem *bullet) draw(parameters drawParameters) error {
 			return err
 		}
 	}
-
 	return nil
+}
+
+func (elem *bullet) getBoundingCircle() boundingCircle {
+	return elem.boundingCircle
+}
+
+func (elem *bullet) reset() {
+	elem.active = false
+	for _, comp := range elem.logicComponents {
+		switch comp.(type) {
+		case *bulletMover:
+			comp.(*bulletMover).position.x = 0
+			comp.(*bulletMover).position.y = 0
+		}
+	}
 }
 
 func newBullet(renderer *sdl.Renderer) *bullet {
@@ -63,7 +96,15 @@ func newBullet(renderer *sdl.Renderer) *bullet {
 		element{
 			active:          false,
 			logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
+			attributes:      []attribute{&vulnerableToBullets{}},
 			uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
+			boundingCircle: boundingCircle{
+				center: vector{
+					x: 0,
+					y: 0,
+				},
+				radius: 16,
+			},
 		},
 	}
 }

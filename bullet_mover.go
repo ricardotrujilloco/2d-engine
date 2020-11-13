@@ -6,13 +6,6 @@ type bulletMover struct {
 	active   bool
 }
 
-type updateParameters struct {
-	position vector
-	rotation float64
-	width    float64
-	elapsed  float64
-}
-
 func newBulletMover(speed float64) *bulletMover {
 	return &bulletMover{
 		speed: speed,
