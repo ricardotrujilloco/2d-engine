@@ -11,17 +11,27 @@ type multiSpriteRenderer struct {
 	renderer  *sdl.Renderer
 	sequences map[ElementState]*multiSpriteRendererSequence
 	animator  *animator
+	width     int32
+	height    int32
 }
 
 type multiSpriteRendererSequence struct {
 	textures []*sdl.Texture
 }
 
-func newMultiSpriteRenderer(renderer *sdl.Renderer, sequences map[ElementState]*multiSpriteRendererSequence, animator *animator) *multiSpriteRenderer {
+func newMultiSpriteRenderer(
+	renderer *sdl.Renderer,
+	sequences map[ElementState]*multiSpriteRendererSequence,
+	animator *animator,
+	width int32,
+	height int32,
+) *multiSpriteRenderer {
 	return &multiSpriteRenderer{
 		renderer:  renderer,
 		sequences: sequences,
 		animator:  animator,
+		width:     width,
+		height:    height,
 	}
 }
 
@@ -35,15 +45,15 @@ func (sr *multiSpriteRenderer) onDraw(parameters drawParameters) error {
 	}
 
 	// Converting coordinates to top left of sprite
-	x := parameters.position.x - float64(width)/2.0
-	y := parameters.position.y - float64(height)/2.0
+	x := parameters.position.x - float64(sr.width)/2.0
+	y := parameters.position.y - float64(sr.height)/2.0
 
 	sr.renderer.CopyEx(
 		tex,
 		&sdl.Rect{X: 0, Y: 0, W: width, H: height},
-		&sdl.Rect{X: int32(x), Y: int32(y), W: width, H: height},
+		&sdl.Rect{X: int32(x), Y: int32(y), W: sr.width, H: sr.height},
 		parameters.rotation,
-		&sdl.Point{X: width / 2, Y: height / 2},
+		&sdl.Point{X: sr.width / 2, Y: sr.height / 2},
 		sdl.FLIP_NONE)
 
 	return nil
@@ -62,7 +72,7 @@ func newMultiSpriteRendererSequence(
 
 	for _, file := range files {
 		filename := path.Join(filepath, file.Name())
-		tex := textureFromBMP(renderer, filename)
+		tex := textureFromPNG(renderer, filename)
 
 		seq.textures = append(seq.textures, tex)
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -18,17 +19,19 @@ type drawParameters struct {
 
 func newSpriteRenderer(renderer *sdl.Renderer, filename string) *spriteRenderer {
 	tex := textureFromBMP(renderer, filename)
-
 	_, _, width, height, err := tex.Query()
 	if err != nil {
 		panic(fmt.Errorf("querying texture: %v", err))
 	}
+	return newSpriteRendererWithCustomSize(renderer, filename, float64(width), float64(height))
+}
 
+func newSpriteRendererWithCustomSize(renderer *sdl.Renderer, filename string, width float64, height float64) *spriteRenderer {
 	return &spriteRenderer{
 		renderer: renderer,
 		tex:      textureFromBMP(renderer, filename),
-		width:    float64(width),
-		height:   float64(height),
+		width:    width,
+		height:   height,
 	}
 }
 
@@ -48,13 +51,21 @@ func (sr *spriteRenderer) onDraw(parameters drawParameters) error {
 	return nil
 }
 
-func textureFromBMP(renderer *sdl.Renderer, filename string) *sdl.Texture {
-	img, err := sdl.LoadBMP(filename)
+func textureFromPNG(renderer *sdl.Renderer, filename string) *sdl.Texture {
+	texture, err := img.LoadTexture(renderer, filename)
 	if err != nil {
 		panic(fmt.Errorf("loading %v: %v", filename, err))
 	}
-	defer img.Free()
-	tex, err := renderer.CreateTextureFromSurface(img)
+	return texture
+}
+
+func textureFromBMP(renderer *sdl.Renderer, filename string) *sdl.Texture {
+	bitmap, err := sdl.LoadBMP(filename)
+	if err != nil {
+		panic(fmt.Errorf("loading %v: %v", filename, err))
+	}
+	defer bitmap.Free()
+	tex, err := renderer.CreateTextureFromSurface(bitmap)
 	if err != nil {
 		panic(fmt.Errorf("creating texture from %v: %v", filename, err))
 	}

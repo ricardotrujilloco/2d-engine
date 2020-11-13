@@ -5,7 +5,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-const basicEnemySize = 105
+const basicEnemyWidth = 105
+const basicEnemyHeight = 72
 
 type enemy struct {
 	element
@@ -98,6 +99,8 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) *enemy {
 					renderer,
 					getEnemyUiSequences(renderer),
 					animator,
+					basicEnemyWidth,
+					basicEnemyHeight,
 				),
 			},
 			boundingCircle: boundingCircle{
@@ -110,11 +113,11 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) *enemy {
 }
 
 func getEnemySequences() map[ElementState]*sequence {
-	idleSequence, err := newSequence("data/sprites/basic_enemy/idle", 5, true)
+	idleSequence, err := newSequence("data/sprites/bomb/idle", 10, true)
 	if err != nil {
 		panic(fmt.Errorf("creating idle sequence: %v", err))
 	}
-	destroySequence, err := newSequence("data/sprites/basic_enemy/destroy", 15, false)
+	destroySequence, err := newSequence("data/sprites/bomb/destroy", 15, false)
 	if err != nil {
 		panic(fmt.Errorf("creating destroy sequence: %v", err))
 	}
@@ -126,11 +129,11 @@ func getEnemySequences() map[ElementState]*sequence {
 }
 
 func getEnemyUiSequences(renderer *sdl.Renderer) map[ElementState]*multiSpriteRendererSequence {
-	idleSequenceUi, err := newMultiSpriteRendererSequence("data/sprites/basic_enemy/idle", renderer)
+	idleSequenceUi, err := newMultiSpriteRendererSequence("data/sprites/bomb/idle", renderer)
 	if err != nil {
 		panic(fmt.Errorf("creating idle sequence: %v", err))
 	}
-	destroySequenceUi, err := newMultiSpriteRendererSequence("data/sprites/basic_enemy/destroy", renderer)
+	destroySequenceUi, err := newMultiSpriteRendererSequence("data/sprites/bomb/destroy", renderer)
 	if err != nil {
 		panic(fmt.Errorf("creating destroy sequence: %v", err))
 	}
