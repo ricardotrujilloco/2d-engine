@@ -15,6 +15,15 @@ type element struct {
 	attributes      []attribute
 }
 
+type ElementState int
+
+const (
+	Idle ElementState = iota
+	Inactive
+	Destroying
+	Destroyed
+)
+
 type updateParameters struct {
 	position vector
 	rotation float64
@@ -29,7 +38,7 @@ type gameObject interface {
 	getWidth() *float64
 	update(updateParameters updateParameters) error
 	onCollision(otherElement gameObject) error
-	draw(parameters drawParameters) error
+	draw() error
 	getBoundingCircle() boundingCircle
 }
 

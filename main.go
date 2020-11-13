@@ -13,12 +13,11 @@ import (
 const (
 	screenWidth  = 600
 	screenHeight = 800
-	desiredFps   = 144.0
 )
 
 func main() {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		fmt.Println("initializing SDL:", err)
+		fmt.Println("initializing SDL: ", err)
 		return
 	}
 
@@ -28,14 +27,14 @@ func main() {
 		screenWidth, screenHeight,
 		sdl.WINDOW_OPENGL)
 	if err != nil {
-		fmt.Println("initializing window:", err)
+		fmt.Println("initializing window: ", err)
 		return
 	}
 	defer window.Destroy()
 
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC)
 	if err != nil {
-		fmt.Println("initializing renderer:", err)
+		fmt.Println("initializing renderer: ", err)
 		return
 	}
 	defer renderer.Destroy()
@@ -60,10 +59,16 @@ func main() {
 	}
 	defer font.Close()
 
-	mainLoop(renderer, font, err)
+	sdl.GetNumVideoDisplays()
+	mode, err := sdl.GetDisplayMode(0, 0)
+	if err != nil {
+		panic(fmt.Errorf("display mode error: %v", err))
+	}
+	desiredFps := float64(mode.RefreshRate)
+	mainLoop(renderer, font, desiredFps, err)
 }
 
-func mainLoop(renderer *sdl.Renderer, font *ttf.Font, err error) {
+func mainLoop(renderer *sdl.Renderer, font *ttf.Font, desiredFps float64, err error) {
 	now := float64(0)
 	fps := 0.0
 	desiredFrameTime := 1000 / desiredFps
@@ -120,7 +125,7 @@ func updateElements(timeElapsedSinceLastLoop float64) {
 			}
 			err := elem.update(updateParameters)
 			if err != nil {
-				fmt.Println("updating element:", elem)
+				fmt.Println("updating element: ", elem)
 				return
 			}
 		}
@@ -130,13 +135,9 @@ func updateElements(timeElapsedSinceLastLoop float64) {
 func drawElements(err error) bool {
 	for _, elem := range elements {
 		if *elem.isActive() {
-			drawParameters := drawParameters{
-				position: *elem.getPosition(),
-				rotation: *elem.getRotation(),
-			}
-			err = elem.draw(drawParameters)
+			err = elem.draw()
 			if err != nil {
-				fmt.Println("drawing element:", elem)
+				fmt.Println("drawing element: ", elem)
 				return true
 			}
 		}

@@ -7,8 +7,8 @@ import (
 )
 
 type animator struct {
-	sequences       map[string]*sequence
-	currentSequence string
+	sequences       map[ElementState]*sequence
+	currentSequence ElementState
 	lastFrameChange time.Time
 	finished        bool
 }
@@ -18,9 +18,10 @@ type sequence struct {
 	frame      int
 	sampleRate float64
 	loop       bool
+	finished   bool
 }
 
-func newAnimator(sequences map[string]*sequence, defaultSequence string) *animator {
+func newAnimator(sequences map[ElementState]*sequence, defaultSequence ElementState) *animator {
 	var an animator
 
 	an.sequences = sequences
@@ -35,14 +36,17 @@ func (an *animator) onUpdate(parameters updateParameters) error {
 	frameInterval := float64(time.Second) / sequence.sampleRate
 
 	if time.Since(an.lastFrameChange) >= time.Duration(frameInterval) {
-		an.finished = sequence.nextFrame()
+		sequence.nextFrame()
+		if sequence.finished && !sequence.loop {
+			an.finished = true
+		}
 		an.lastFrameChange = time.Now()
 	}
 	return nil
 }
 
-func (an *animator) setSequence(name string) {
-	an.currentSequence = name
+func (an *animator) setSequence(sequence ElementState) {
+	an.currentSequence = sequence
 	an.lastFrameChange = time.Now()
 }
 
@@ -68,16 +72,14 @@ func newSequence(
 	return &seq, nil
 }
 
-func (seq *sequence) nextFrame() bool {
+func (seq *sequence) nextFrame() {
 	if seq.frame == len(seq.textures)-1 {
 		if seq.loop {
 			seq.frame = 0
 		} else {
-			return true
+			seq.finished = true
 		}
 	} else {
 		seq.frame++
 	}
-
-	return false
 }

@@ -66,7 +66,11 @@ func (elem *bullet) onCollision(otherElement gameObject) error {
 	return nil
 }
 
-func (elem *bullet) draw(parameters drawParameters) error {
+func (elem *bullet) draw() error {
+	parameters := drawParameters{
+		position: *elem.getPosition(),
+		rotation: *elem.getRotation(),
+	}
 	for _, comp := range elem.uiComponents {
 		err := comp.onDraw(parameters)
 		if err != nil {

@@ -9,7 +9,7 @@ import (
 
 type multiSpriteRenderer struct {
 	renderer  *sdl.Renderer
-	sequences map[string]*multiSpriteRendererSequence
+	sequences map[ElementState]*multiSpriteRendererSequence
 	animator  *animator
 }
 
@@ -17,7 +17,7 @@ type multiSpriteRendererSequence struct {
 	textures []*sdl.Texture
 }
 
-func newMultiSpriteRenderer(renderer *sdl.Renderer, sequences map[string]*multiSpriteRendererSequence, animator *animator) *multiSpriteRenderer {
+func newMultiSpriteRenderer(renderer *sdl.Renderer, sequences map[ElementState]*multiSpriteRendererSequence, animator *animator) *multiSpriteRenderer {
 	return &multiSpriteRenderer{
 		renderer:  renderer,
 		sequences: sequences,
