@@ -11,6 +11,7 @@ const (
 
 type bullet struct {
 	element
+	state ElementState
 }
 
 func (elem *bullet) isActive() bool {
@@ -110,6 +111,7 @@ func newBullet(renderer *sdl.Renderer) bullet {
 				radius: 16,
 			},
 		},
+		Inactive,
 	}
 }
 

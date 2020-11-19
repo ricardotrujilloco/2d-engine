@@ -22,16 +22,6 @@ type sequence struct {
 	lastSequence bool
 }
 
-func newAnimator(sequences map[ElementState]*sequence, defaultSequence ElementState) *animator {
-	var an animator
-
-	an.sequences = sequences
-	an.currentSequence = defaultSequence
-	an.lastFrameChange = time.Now()
-
-	return &an
-}
-
 func (an *animator) onUpdate(parameters updateParameters) error {
 	sequence := an.sequences[an.currentSequence]
 	frameInterval := float64(time.Second) / sequence.sampleRate
@@ -86,4 +76,14 @@ func (seq *sequence) nextFrame() {
 	} else {
 		seq.frame++
 	}
+}
+
+func newAnimator(sequences map[ElementState]*sequence, defaultSequence ElementState) *animator {
+	var an animator
+
+	an.sequences = sequences
+	an.currentSequence = defaultSequence
+	an.lastFrameChange = time.Now()
+
+	return &an
 }

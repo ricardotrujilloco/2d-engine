@@ -39,6 +39,7 @@ type updateParameters struct {
 	rotation float64
 	width    float64
 	elapsed  float64
+	state    ElementState
 }
 
 type gameObject interface {

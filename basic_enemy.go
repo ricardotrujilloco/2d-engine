@@ -35,30 +35,22 @@ func (elem *enemy) getWidth() float64 {
 
 func (elem *enemy) update(updateParameters updateParameters) error {
 	var err error = nil
-	err = elem.updateAnimator(updateParameters, err)
-	err = elem.updateBoundingCircleScaler(updateParameters, err)
+	updateParameters.state = elem.state
+	for _, comp := range elem.logicComponents {
+		err = comp.onUpdate(updateParameters)
+	}
+	elem.onAnimatorUpdated()
 	return err
 }
 
-func (elem *enemy) updateAnimator(updateParameters updateParameters, err error) error {
+func (elem *enemy) onAnimatorUpdated() {
 	if component, ok := elem.logicComponents[Animator]; ok {
-		err = component.onUpdate(updateParameters)
 		animator := component.(*animator)
 		if animator.finished {
 			elem.state = Inactive
 			elem.active = false
 		}
 	}
-	return err
-}
-
-func (elem *enemy) updateBoundingCircleScaler(updateParameters updateParameters, err error) error {
-	if component, ok := elem.logicComponents[BoundingCircleScaler]; ok {
-		if elem.state == Destroying {
-			err = component.onUpdate(updateParameters)
-		}
-	}
-	return err
 }
 
 func (elem *enemy) onCollision(otherElement gameObject) error {

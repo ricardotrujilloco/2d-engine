@@ -13,10 +13,11 @@ const (
 
 type player struct {
 	element
+	state ElementState
 }
 
 func (elem *player) isActive() bool {
-	return elem.active
+	return elem.state == Idle
 }
 
 func (elem *player) getPosition() vector {
@@ -79,7 +80,6 @@ func newPlayer(renderer *sdl.Renderer) player {
 		element{
 			position: position,
 			width:    spriteRenderer.width,
-			active:   true,
 			logicComponents: map[LogicComponentType]logicComponent{
 				KeyboardMover:   newKeyboardMover(playerSpeed),
 				KeyboardShooter: newKeyboardShooter(playerShotCoolDown),
@@ -90,5 +90,6 @@ func newPlayer(renderer *sdl.Renderer) player {
 				radius: 8,
 			},
 		},
+		Idle,
 	}
 }
