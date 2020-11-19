@@ -15,20 +15,20 @@ type player struct {
 	element
 }
 
-func (elem *player) isActive() *bool {
-	return &elem.active
+func (elem *player) isActive() bool {
+	return elem.active
 }
 
-func (elem *player) getPosition() *vector {
-	return &elem.position
+func (elem *player) getPosition() vector {
+	return elem.position
 }
 
-func (elem *player) getRotation() *float64 {
-	return &elem.rotation
+func (elem *player) getRotation() float64 {
+	return elem.rotation
 }
 
-func (elem *player) getWidth() *float64 {
-	return &elem.width
+func (elem *player) getWidth() float64 {
+	return elem.width
 }
 
 func (elem *player) update(updateParameters updateParameters) error {
@@ -52,9 +52,9 @@ func (elem *player) onCollision(otherElement gameObject) error {
 }
 
 func (elem *player) draw() error {
-	parameters := drawParameters{
-		position: *elem.getPosition(),
-		rotation: *elem.getRotation(),
+	parameters := &spriteDrawParameters{
+		position: elem.getPosition(),
+		rotation: elem.getRotation(),
 	}
 	for _, comp := range elem.uiComponents {
 		err := comp.onDraw(parameters)
@@ -65,17 +65,17 @@ func (elem *player) draw() error {
 	return nil
 }
 
-func (elem *player) getBoundingCircle() boundingCircle {
+func (elem *player) getBoundingCircle() *boundingCircle {
 	return elem.boundingCircle
 }
 
-func newPlayer(renderer *sdl.Renderer) *player {
+func newPlayer(renderer *sdl.Renderer) player {
 	spriteRenderer := newSpriteRenderer(renderer, "data/sprites/player.bmp")
 	position := vector{
 		x: screenWidth / 2.0,
 		y: screenHeight - playerSize/2.0,
 	}
-	return &player{
+	return player{
 		element{
 			position: position,
 			width:    spriteRenderer.width,
@@ -85,7 +85,7 @@ func newPlayer(renderer *sdl.Renderer) *player {
 				newKeyboardShooter(playerShotCoolDown),
 			},
 			uiComponents: []uiComponent{spriteRenderer},
-			boundingCircle: boundingCircle{
+			boundingCircle: &boundingCircle{
 				center: position,
 				radius: 8,
 			},

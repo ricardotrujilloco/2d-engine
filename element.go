@@ -9,7 +9,7 @@ type element struct {
 	width           float64
 	rotation        float64
 	active          bool
-	boundingCircle  boundingCircle
+	boundingCircle  *boundingCircle
 	logicComponents []logicComponent
 	uiComponents    []uiComponent
 	attributes      []attribute
@@ -32,14 +32,14 @@ type updateParameters struct {
 }
 
 type gameObject interface {
-	isActive() *bool
-	getPosition() *vector
-	getRotation() *float64
-	getWidth() *float64
+	isActive() bool
+	getPosition() vector
+	getRotation() float64
+	getWidth() float64
 	update(updateParameters updateParameters) error
 	onCollision(otherElement gameObject) error
 	draw() error
-	getBoundingCircle() boundingCircle
+	getBoundingCircle() *boundingCircle
 }
 
 type uiComponent interface {
@@ -53,4 +53,4 @@ type logicComponent interface {
 type attribute interface {
 }
 
-var elements []gameObject
+var gameObjects []gameObject

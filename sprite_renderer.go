@@ -12,9 +12,22 @@ type spriteRenderer struct {
 	width, height float64
 }
 
-type drawParameters struct {
+type drawParameters interface {
+	getPosition() vector
+	getRotation() float64
+}
+
+type spriteDrawParameters struct {
 	position vector
 	rotation float64
+}
+
+func (parameters *spriteDrawParameters) getPosition() vector {
+	return parameters.position
+}
+
+func (parameters *spriteDrawParameters) getRotation() float64 {
+	return parameters.rotation
 }
 
 func newSpriteRenderer(renderer *sdl.Renderer, filename string) *spriteRenderer {
@@ -37,14 +50,14 @@ func newSpriteRendererWithCustomSize(renderer *sdl.Renderer, filename string, wi
 
 func (sr *spriteRenderer) onDraw(parameters drawParameters) error {
 	// Converting coordinates to top left of sprite
-	x := parameters.position.x - sr.width/2.0
-	y := parameters.position.y - sr.height/2.0
+	x := parameters.getPosition().x - sr.width/2.0
+	y := parameters.getPosition().y - sr.height/2.0
 
 	sr.renderer.CopyEx(
 		sr.tex,
 		&sdl.Rect{X: 0, Y: 0, W: int32(sr.width), H: int32(sr.height)},
 		&sdl.Rect{X: int32(x), Y: int32(y), W: int32(sr.width), H: int32(sr.height)},
-		parameters.rotation,
+		parameters.getRotation(),
 		&sdl.Point{X: int32(sr.width) / 2, Y: int32(sr.height) / 2},
 		sdl.FLIP_NONE)
 

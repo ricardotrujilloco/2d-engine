@@ -14,11 +14,12 @@ type animator struct {
 }
 
 type sequence struct {
-	textures   []string
-	frame      int
-	sampleRate float64
-	loop       bool
-	finished   bool
+	textures     []string
+	frame        int
+	sampleRate   float64
+	loop         bool
+	finished     bool
+	lastSequence bool
 }
 
 func newAnimator(sequences map[ElementState]*sequence, defaultSequence ElementState) *animator {
@@ -37,7 +38,7 @@ func (an *animator) onUpdate(parameters updateParameters) error {
 
 	if time.Since(an.lastFrameChange) >= time.Duration(frameInterval) {
 		sequence.nextFrame()
-		if sequence.finished && !sequence.loop {
+		if sequence.finished && sequence.lastSequence {
 			an.finished = true
 		}
 		an.lastFrameChange = time.Now()
@@ -53,7 +54,9 @@ func (an *animator) setSequence(sequence ElementState) {
 func newSequence(
 	filepath string,
 	sampleRate float64,
-	loop bool) (*sequence, error) {
+	loop bool,
+	lastSequence bool,
+) (*sequence, error) {
 
 	var seq sequence
 
@@ -68,6 +71,7 @@ func newSequence(
 
 	seq.sampleRate = sampleRate
 	seq.loop = loop
+	seq.lastSequence = lastSequence
 
 	return &seq, nil
 }

@@ -13,20 +13,20 @@ type bullet struct {
 	element
 }
 
-func (elem *bullet) isActive() *bool {
-	return &elem.active
+func (elem *bullet) isActive() bool {
+	return elem.active
 }
 
-func (elem *bullet) getPosition() *vector {
-	return &elem.position
+func (elem *bullet) getPosition() vector {
+	return elem.position
 }
 
-func (elem *bullet) getRotation() *float64 {
-	return &elem.rotation
+func (elem *bullet) getRotation() float64 {
+	return elem.rotation
 }
 
-func (elem *bullet) getWidth() *float64 {
-	return &elem.width
+func (elem *bullet) getWidth() float64 {
+	return elem.width
 }
 
 func (elem *bullet) update(updateParameters updateParameters) error {
@@ -67,9 +67,9 @@ func (elem *bullet) onCollision(otherElement gameObject) error {
 }
 
 func (elem *bullet) draw() error {
-	parameters := drawParameters{
-		position: *elem.getPosition(),
-		rotation: *elem.getRotation(),
+	parameters := &spriteDrawParameters{
+		position: elem.getPosition(),
+		rotation: elem.getRotation(),
 	}
 	for _, comp := range elem.uiComponents {
 		err := comp.onDraw(parameters)
@@ -80,7 +80,7 @@ func (elem *bullet) draw() error {
 	return nil
 }
 
-func (elem *bullet) getBoundingCircle() boundingCircle {
+func (elem *bullet) getBoundingCircle() *boundingCircle {
 	return elem.boundingCircle
 }
 
@@ -95,14 +95,14 @@ func (elem *bullet) reset() {
 	}
 }
 
-func newBullet(renderer *sdl.Renderer) *bullet {
-	return &bullet{
+func newBullet(renderer *sdl.Renderer) bullet {
+	return bullet{
 		element{
 			active:          false,
 			logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
 			attributes:      []attribute{&vulnerableToBullets{}},
 			uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
-			boundingCircle: boundingCircle{
+			boundingCircle: &boundingCircle{
 				center: vector{
 					x: 0,
 					y: 0,
@@ -118,14 +118,14 @@ var bulletPool []gameObject
 func initBulletPool(renderer *sdl.Renderer) {
 	for i := 0; i < 30; i++ {
 		bul := newBullet(renderer)
-		elements = append(elements, bul)
-		bulletPool = append(bulletPool, bul)
+		gameObjects = append(gameObjects, &bul)
+		bulletPool = append(bulletPool, &bul)
 	}
 }
 
 func bulletFromPool() (gameObject, bool) {
 	for _, bul := range bulletPool {
-		if !*bul.isActive() {
+		if !bul.isActive() {
 			return bul, true
 		}
 	}

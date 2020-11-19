@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"reflect"
 	"strconv"
 	"time"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 const (
@@ -39,7 +38,8 @@ func main() {
 	}
 	defer renderer.Destroy()
 
-	elements = append(elements, newPlayer(renderer))
+	player := newPlayer(renderer)
+	gameObjects = append(gameObjects, &player)
 
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 3; j++ {
@@ -47,7 +47,7 @@ func main() {
 			y := float64(j)*basicEnemyWidth + (basicEnemyWidth / 2.0)
 
 			enemy := newBasicEnemy(renderer, vector{x, y})
-			elements = append(elements, enemy)
+			gameObjects = append(gameObjects, &enemy)
 		}
 	}
 
@@ -110,22 +110,22 @@ func mainLoop(renderer *sdl.Renderer, font *ttf.Font, desiredFps float64, err er
 }
 
 func updateElements(timeElapsedSinceLastLoop float64) {
-	var playerInstance *player
-	for _, elem := range elements {
+	var playerInstance gameObject
+	for _, elem := range gameObjects {
 		if reflect.TypeOf(elem) == reflect.TypeOf(&player{}) {
-			playerInstance = elem.(*player)
+			playerInstance = elem
 		}
 	}
-	for _, elem := range elements {
-		if *elem.isActive() && playerInstance != nil {
+	for _, object := range gameObjects {
+		if object.isActive() && playerInstance != nil {
 			updateParameters := updateParameters{
-				position: *playerInstance.getPosition(),
+				position: playerInstance.getPosition(),
 				elapsed:  timeElapsedSinceLastLoop,
-				width:    *elem.getWidth(),
+				width:    object.getWidth(),
 			}
-			err := elem.update(updateParameters)
+			err := object.update(updateParameters)
 			if err != nil {
-				fmt.Println("updating element: ", elem)
+				fmt.Println("updating element: ", object)
 				return
 			}
 		}
@@ -133,8 +133,8 @@ func updateElements(timeElapsedSinceLastLoop float64) {
 }
 
 func drawElements(err error) bool {
-	for _, elem := range elements {
-		if *elem.isActive() {
+	for _, elem := range gameObjects {
+		if elem.isActive() {
 			err = elem.draw()
 			if err != nil {
 				fmt.Println("drawing element: ", elem)
