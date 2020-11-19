@@ -58,6 +58,8 @@ func (elem *enemy) onCollision(otherElement gameObject) error {
 	switch otherElement.(type) {
 	case *bullet:
 		elem.onBulletCollision()
+	case *enemy:
+		elem.onEnemyCollision()
 	}
 	return nil
 }
@@ -98,6 +100,19 @@ func (elem *enemy) onBulletCollision() {
 		}
 	}
 	if isVulnerableToBullets {
+		elem.state = Destroying
+		for _, comp := range elem.logicComponents {
+			switch comp.(type) {
+			case *animator:
+				animator := comp.(*animator)
+				animator.setSequence(Destroying)
+			}
+		}
+	}
+}
+
+func (elem *enemy) onEnemyCollision() {
+	if elem.state == Idle {
 		elem.state = Destroying
 		for _, comp := range elem.logicComponents {
 			switch comp.(type) {
