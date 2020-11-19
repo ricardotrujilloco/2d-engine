@@ -17,7 +17,7 @@ type player struct {
 }
 
 func (elem *player) isActive() bool {
-	return elem.state == Idle
+	return elem.state == Active
 }
 
 func (elem *player) getPosition() vector {
@@ -90,6 +90,6 @@ func newPlayer(renderer *sdl.Renderer) player {
 				radius: 8,
 			},
 		},
-		Idle,
+		Active,
 	}
 }

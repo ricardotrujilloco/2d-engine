@@ -18,7 +18,7 @@ type element struct {
 type ElementState int
 
 const (
-	Idle ElementState = iota
+	Active ElementState = iota
 	Inactive
 	Destroying
 	Destroyed

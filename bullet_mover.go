@@ -4,6 +4,7 @@ type bulletMover struct {
 	position vector
 	speed    float64
 	active   bool
+	state    ElementState
 }
 
 func newBulletMover(speed float64) *bulletMover {
@@ -18,6 +19,7 @@ func (mover *bulletMover) onUpdate(parameters updateParameters) error {
 		mover.position.x = parameters.position.x
 		mover.position.y = parameters.position.y
 		mover.active = true
+		mover.state = Active
 	}
 
 	// mover.position.x += bulletSpeed * parameters.elapsed
@@ -28,6 +30,7 @@ func (mover *bulletMover) onUpdate(parameters updateParameters) error {
 		mover.position.x = 0
 		mover.position.y = 0
 		mover.active = false
+		mover.state = Inactive
 		return nil
 	}
 

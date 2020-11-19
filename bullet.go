@@ -44,6 +44,11 @@ func (elem *bullet) update(updateParameters updateParameters) error {
 		elem.position.y = position.y
 		elem.boundingCircle.center = position
 		elem.active = bulletMover.active
+		if bulletMover.active {
+			elem.state = Active
+		} else {
+			elem.state = Inactive
+		}
 	}
 	return nil
 }
@@ -85,6 +90,7 @@ func (elem *bullet) getBoundingCircle() *boundingCircle {
 
 func (elem *bullet) reset() {
 	elem.active = false
+	elem.state = Inactive
 	for _, comp := range elem.logicComponents {
 		switch comp.(type) {
 		case *bulletMover:

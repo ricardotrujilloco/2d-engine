@@ -105,7 +105,7 @@ func (elem *enemy) onBulletCollision() {
 }
 
 func (elem *enemy) onEnemyCollision() {
-	if elem.state == Idle {
+	if elem.state == Active {
 		elem.state = Destroying
 		elem.setAnimatorState(Destroying)
 	}
@@ -123,7 +123,7 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) enemy {
 	basicEnemyRadiusScaleFactor := 0.25
 	basicEnemyInitialRadius := (810 / 4) * basicEnemyRadiusScaleFactor // From sprite dimensions
 	basicEnemyFinalRadius := (810 / 2) * basicEnemyRadiusScaleFactor   // From sprite dimensions
-	animator := newAnimator(getEnemySequences(destroyingSampleRate), Idle)
+	animator := newAnimator(getEnemySequences(destroyingSampleRate), Active)
 	circle := &boundingCircle{center: position, radius: basicEnemyInitialRadius}
 	boundingCircles := []*boundingCircle{circle}
 	boundingCircleScaler := newBoundingCircleScaler(boundingCircles, basicEnemyFinalRadius)
@@ -151,7 +151,7 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) enemy {
 			},
 			boundingCircle: circle,
 		},
-		Idle,
+		Active,
 	}
 }
 
@@ -167,7 +167,7 @@ func getEnemySequences(
 		panic(fmt.Errorf("creating onBulletCollision sequence: %v", err))
 	}
 	sequences := map[ElementState]*sequence{
-		Idle:       idleSequence,
+		Active:     idleSequence,
 		Destroying: destroySequence,
 	}
 	return sequences
@@ -183,7 +183,7 @@ func getEnemyUiSequences(renderer *sdl.Renderer) map[ElementState]*multiSpriteRe
 		panic(fmt.Errorf("creating onBulletCollision sequence: %v", err))
 	}
 	uiSequences := map[ElementState]*multiSpriteRendererSequence{
-		Idle:       idleSequenceUi,
+		Active:     idleSequenceUi,
 		Destroying: destroySequenceUi,
 	}
 	return uiSequences
