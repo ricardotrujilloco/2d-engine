@@ -10,7 +10,7 @@ type element struct {
 	rotation        float64
 	active          bool
 	boundingCircle  *boundingCircle
-	logicComponents []logicComponent
+	logicComponents map[LogicComponentType]logicComponent
 	uiComponents    []uiComponent
 	attributes      []attribute
 }
@@ -22,6 +22,16 @@ const (
 	Inactive
 	Destroying
 	Destroyed
+)
+
+type LogicComponentType int
+
+const (
+	Animator LogicComponentType = iota
+	BoundingCircleScaler
+	BulletMover
+	KeyboardMover
+	KeyboardShooter
 )
 
 type updateParameters struct {

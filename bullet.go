@@ -36,15 +36,13 @@ func (elem *bullet) update(updateParameters updateParameters) error {
 			return err
 		}
 	}
-	for _, comp := range elem.logicComponents {
-		switch comp.(type) {
-		case *bulletMover:
-			position := comp.(*bulletMover).position
-			elem.position.x = position.x
-			elem.position.y = position.y
-			elem.boundingCircle.center = position
-			elem.active = comp.(*bulletMover).active
-		}
+	if component, ok := elem.logicComponents[BulletMover]; ok {
+		bulletMover := component.(*bulletMover)
+		position := bulletMover.position
+		elem.position.x = position.x
+		elem.position.y = position.y
+		elem.boundingCircle.center = position
+		elem.active = bulletMover.active
 	}
 	return nil
 }
@@ -98,10 +96,12 @@ func (elem *bullet) reset() {
 func newBullet(renderer *sdl.Renderer) bullet {
 	return bullet{
 		element{
-			active:          false,
-			logicComponents: []logicComponent{newBulletMover(bulletSpeed)},
-			attributes:      []attribute{&vulnerableToBullets{}},
-			uiComponents:    []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
+			active: false,
+			logicComponents: map[LogicComponentType]logicComponent{
+				BulletMover: newBulletMover(bulletSpeed),
+			},
+			attributes:   []attribute{&vulnerableToBullets{}},
+			uiComponents: []uiComponent{newSpriteRenderer(renderer, "data/sprites/player_bullet.bmp")},
 			boundingCircle: &boundingCircle{
 				center: vector{
 					x: 0,

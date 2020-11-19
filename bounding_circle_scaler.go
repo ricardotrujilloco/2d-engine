@@ -17,11 +17,13 @@ func newBoundingCircleScaler(
 }
 
 func (scaler *boundingCircleScaler) onUpdate(parameters updateParameters) error {
-	for _, circle := range scaler.boundingCircles {
-		if circle.radius < scaler.maxRadius {
-			circle.radius += explosionSpeed * parameters.elapsed
-		} else {
-			scaler.isMaxRadiusReached = true
+	if !scaler.isMaxRadiusReached {
+		for _, circle := range scaler.boundingCircles {
+			if circle.radius < scaler.maxRadius {
+				circle.radius += explosionSpeed * parameters.elapsed
+			} else {
+				scaler.isMaxRadiusReached = true
+			}
 		}
 	}
 	return nil

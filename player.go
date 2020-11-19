@@ -80,9 +80,9 @@ func newPlayer(renderer *sdl.Renderer) player {
 			position: position,
 			width:    spriteRenderer.width,
 			active:   true,
-			logicComponents: []logicComponent{
-				newKeyboardMover(playerSpeed),
-				newKeyboardShooter(playerShotCoolDown),
+			logicComponents: map[LogicComponentType]logicComponent{
+				KeyboardMover:   newKeyboardMover(playerSpeed),
+				KeyboardShooter: newKeyboardShooter(playerShotCoolDown),
 			},
 			uiComponents: []uiComponent{spriteRenderer},
 			boundingCircle: &boundingCircle{

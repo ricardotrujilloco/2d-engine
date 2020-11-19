@@ -35,20 +35,27 @@ func (elem *enemy) getWidth() float64 {
 
 func (elem *enemy) update(updateParameters updateParameters) error {
 	var err error = nil
-	for _, comp := range elem.logicComponents {
-		switch comp.(type) {
-		case *animator:
-			err = comp.onUpdate(updateParameters)
-			animator := comp.(*animator)
-			if animator.finished {
-				elem.state = Inactive
-				elem.active = false
-			}
-		case *boundingCircleScaler:
-			scaler := comp.(*boundingCircleScaler)
-			if elem.state == Destroying && !scaler.isMaxRadiusReached {
-				err = comp.onUpdate(updateParameters)
-			}
+	err = elem.updateAnimator(updateParameters, err)
+	err = elem.updateBoundingCircleScaler(updateParameters, err)
+	return err
+}
+
+func (elem *enemy) updateAnimator(updateParameters updateParameters, err error) error {
+	if component, ok := elem.logicComponents[Animator]; ok {
+		err = component.onUpdate(updateParameters)
+		animator := component.(*animator)
+		if animator.finished {
+			elem.state = Inactive
+			elem.active = false
+		}
+	}
+	return err
+}
+
+func (elem *enemy) updateBoundingCircleScaler(updateParameters updateParameters, err error) error {
+	if component, ok := elem.logicComponents[BoundingCircleScaler]; ok {
+		if elem.state == Destroying {
+			err = component.onUpdate(updateParameters)
 		}
 	}
 	return err
@@ -101,26 +108,21 @@ func (elem *enemy) onBulletCollision() {
 	}
 	if isVulnerableToBullets {
 		elem.state = Destroying
-		for _, comp := range elem.logicComponents {
-			switch comp.(type) {
-			case *animator:
-				animator := comp.(*animator)
-				animator.setSequence(Destroying)
-			}
-		}
+		elem.setAnimatorState(Destroying)
 	}
 }
 
 func (elem *enemy) onEnemyCollision() {
 	if elem.state == Idle {
 		elem.state = Destroying
-		for _, comp := range elem.logicComponents {
-			switch comp.(type) {
-			case *animator:
-				animator := comp.(*animator)
-				animator.setSequence(Destroying)
-			}
-		}
+		elem.setAnimatorState(Destroying)
+	}
+}
+
+func (elem *enemy) setAnimatorState(state ElementState) {
+	if component, ok := elem.logicComponents[Animator]; ok {
+		animator := component.(*animator)
+		animator.setSequence(state)
 	}
 }
 
@@ -138,9 +140,9 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) enemy {
 			position: position,
 			rotation: 180,
 			active:   true,
-			logicComponents: []logicComponent{
-				animator,
-				boundingCircleScaler,
+			logicComponents: map[LogicComponentType]logicComponent{
+				Animator:             animator,
+				BoundingCircleScaler: boundingCircleScaler,
 			},
 			attributes: []attribute{&vulnerableToBullets{}},
 			uiComponents: []uiComponent{
