@@ -3,7 +3,6 @@ package main
 type bulletMover struct {
 	position vector
 	speed    float64
-	active   bool
 	state    ElementState
 }
 
@@ -18,7 +17,6 @@ func (mover *bulletMover) onUpdate(parameters updateParameters) error {
 	if mover.position.x == 0 && mover.position.y == 0 {
 		mover.position.x = parameters.position.x
 		mover.position.y = parameters.position.y
-		mover.active = true
 		mover.state = Active
 	}
 
@@ -29,7 +27,6 @@ func (mover *bulletMover) onUpdate(parameters updateParameters) error {
 		mover.position.y > float64(screenHeight) || mover.position.y < float64(0) {
 		mover.position.x = 0
 		mover.position.y = 0
-		mover.active = false
 		mover.state = Inactive
 		return nil
 	}

@@ -17,7 +17,9 @@ type player struct {
 }
 
 func (elem *player) isActive() bool {
-	return elem.state == Active
+	return elem.state == Active ||
+		elem.state == Jumping ||
+		elem.state == Destroying
 }
 
 func (elem *player) getPosition() vector {
@@ -39,12 +41,7 @@ func (elem *player) update(updateParameters updateParameters) error {
 			return err
 		}
 	}
-	for _, comp := range elem.logicComponents {
-		switch comp.(type) {
-		case *keyboardMover:
-			elem.position.x = comp.(*keyboardMover).position.x
-		}
-	}
+	elem.onKeyboardMoverUpdated()
 	return nil
 }
 
@@ -70,6 +67,28 @@ func (elem *player) getBoundingCircle() *boundingCircle {
 	return elem.boundingCircle
 }
 
+func (elem *player) onKeyboardMoverUpdated() {
+	if component, ok := elem.logicComponents[KeyboardMover]; ok {
+		keyboardMover := component.(*keyboardMover)
+		elem.position.x = keyboardMover.position.x
+		if keyboardMover.velocity.y > 0 {
+			elem.onJumpMoverUpdated(keyboardMover.velocity.y)
+		}
+	}
+}
+
+func (elem *player) onJumpMoverUpdated(yVelocity float64) {
+	if component, ok := elem.logicComponents[JumpMover]; ok {
+		jumpMover := component.(*jumpMover)
+		if jumpMover.velocity.y == 0 {
+			jumpMover.velocity.y = yVelocity
+			elem.state = Jumping
+			jumpMover.state = Jumping
+		}
+		elem.position.y = jumpMover.position.y
+	}
+}
+
 func newPlayer(renderer *sdl.Renderer) player {
 	spriteRenderer := newSpriteRenderer(renderer, "data/sprites/player.bmp")
 	position := vector{
@@ -77,12 +96,14 @@ func newPlayer(renderer *sdl.Renderer) player {
 		y: screenHeight - playerSize/2.0,
 	}
 	return player{
-		element{
+		state: Active,
+		element: element{
 			position: position,
 			width:    spriteRenderer.width,
 			logicComponents: map[LogicComponentType]logicComponent{
 				KeyboardMover:   newKeyboardMover(playerSpeed),
 				KeyboardShooter: newKeyboardShooter(playerShotCoolDown),
+				JumpMover:       newJumpMover(),
 			},
 			uiComponents: []uiComponent{spriteRenderer},
 			boundingCircle: &boundingCircle{
@@ -90,6 +111,5 @@ func newPlayer(renderer *sdl.Renderer) player {
 				radius: 8,
 			},
 		},
-		Active,
 	}
 }

@@ -15,7 +15,7 @@ type bullet struct {
 }
 
 func (elem *bullet) isActive() bool {
-	return elem.active
+	return elem.state == Active
 }
 
 func (elem *bullet) getPosition() vector {
@@ -43,12 +43,7 @@ func (elem *bullet) update(updateParameters updateParameters) error {
 		elem.position.x = position.x
 		elem.position.y = position.y
 		elem.boundingCircle.center = position
-		elem.active = bulletMover.active
-		if bulletMover.active {
-			elem.state = Active
-		} else {
-			elem.state = Inactive
-		}
+		elem.state = bulletMover.state
 	}
 	return nil
 }
@@ -89,7 +84,6 @@ func (elem *bullet) getBoundingCircle() *boundingCircle {
 }
 
 func (elem *bullet) reset() {
-	elem.active = false
 	elem.state = Inactive
 	for _, comp := range elem.logicComponents {
 		switch comp.(type) {
@@ -102,8 +96,8 @@ func (elem *bullet) reset() {
 
 func newBullet(renderer *sdl.Renderer) bullet {
 	return bullet{
-		element{
-			active: false,
+		state: Inactive,
+		element: element{
 			logicComponents: map[LogicComponentType]logicComponent{
 				BulletMover: newBulletMover(bulletSpeed),
 			},
@@ -117,7 +111,6 @@ func newBullet(renderer *sdl.Renderer) bullet {
 				radius: 16,
 			},
 		},
-		Inactive,
 	}
 }
 

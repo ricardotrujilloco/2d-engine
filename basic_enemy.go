@@ -18,7 +18,8 @@ type enemy struct {
 }
 
 func (elem *enemy) isActive() bool {
-	return elem.active
+	return elem.state == Active ||
+		elem.state == Destroying
 }
 
 func (elem *enemy) getPosition() vector {
@@ -41,16 +42,6 @@ func (elem *enemy) update(updateParameters updateParameters) error {
 	}
 	elem.onAnimatorUpdated()
 	return err
-}
-
-func (elem *enemy) onAnimatorUpdated() {
-	if component, ok := elem.logicComponents[Animator]; ok {
-		animator := component.(*animator)
-		if animator.finished {
-			elem.state = Inactive
-			elem.active = false
-		}
-	}
 }
 
 func (elem *enemy) onCollision(otherElement gameObject) error {
@@ -90,6 +81,15 @@ func (elem *enemy) getBoundingCircle() *boundingCircle {
 	return elem.boundingCircle
 }
 
+func (elem *enemy) onAnimatorUpdated() {
+	if component, ok := elem.logicComponents[Animator]; ok {
+		animator := component.(*animator)
+		if animator.finished {
+			elem.state = Inactive
+		}
+	}
+}
+
 func (elem *enemy) onBulletCollision() {
 	isVulnerableToBullets := false
 	for _, attr := range elem.attributes {
@@ -118,6 +118,13 @@ func (elem *enemy) setAnimatorState(state ElementState) {
 	}
 }
 
+func (elem *enemy) setJumperState(state ElementState) {
+	if component, ok := elem.logicComponents[JumpMover]; ok {
+		jumpMover := component.(*jumpMover)
+		jumpMover.setState(state)
+	}
+}
+
 func newBasicEnemy(renderer *sdl.Renderer, position vector) enemy {
 	destroyingSampleRate := 15.0
 	basicEnemyRadiusScaleFactor := 0.25
@@ -128,10 +135,10 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) enemy {
 	boundingCircles := []*boundingCircle{circle}
 	boundingCircleScaler := newBoundingCircleScaler(boundingCircles, basicEnemyFinalRadius)
 	return enemy{
-		element{
+		state: Active,
+		element: element{
 			position: position,
 			rotation: 180,
-			active:   true,
 			logicComponents: map[LogicComponentType]logicComponent{
 				Animator:             animator,
 				BoundingCircleScaler: boundingCircleScaler,
@@ -151,7 +158,6 @@ func newBasicEnemy(renderer *sdl.Renderer, position vector) enemy {
 			},
 			boundingCircle: circle,
 		},
-		Active,
 	}
 }
 

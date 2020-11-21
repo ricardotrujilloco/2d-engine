@@ -8,7 +8,6 @@ type element struct {
 	position        vector
 	width           float64
 	rotation        float64
-	active          bool
 	boundingCircle  *boundingCircle
 	logicComponents map[LogicComponentType]logicComponent
 	uiComponents    []uiComponent
@@ -22,6 +21,7 @@ const (
 	Inactive
 	Destroying
 	Destroyed
+	Jumping
 )
 
 type LogicComponentType int
@@ -32,10 +32,12 @@ const (
 	BulletMover
 	KeyboardMover
 	KeyboardShooter
+	JumpMover
 )
 
 type updateParameters struct {
 	position vector
+	velocity vector
 	rotation float64
 	width    float64
 	elapsed  float64
